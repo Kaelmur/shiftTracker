@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+eas.json
 
 # Native
 .kotlin/
@@ -17,6 +18,8 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+.gitignore
+.vscode/
 
 # Metro
 .metro-health-check*
@@ -32,6 +35,9 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+android
+ios
 
 # typescript
 *.tsbuildinfo
