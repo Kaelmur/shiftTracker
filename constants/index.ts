@@ -32,6 +32,7 @@ import onboarding2 from "@/assets/images/onboarding2.png";
 import onboarding3 from "@/assets/images/onboarding3.png";
 import signUpCar from "@/assets/images/signup-car.png";
 import greentruck from "@/assets/images/greentruck.png";
+import userlocation from "@/assets/icons/userlocation.png";
 
 export const images = {
   onboarding1,
@@ -56,6 +57,7 @@ export const icons = {
   email,
   eyecross,
   google,
+  userlocation,
   home,
   list,
   lock,

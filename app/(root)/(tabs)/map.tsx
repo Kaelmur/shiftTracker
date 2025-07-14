@@ -82,7 +82,7 @@ const Map = () => {
             }}
           >
             <Image
-              source={icons.point}
+              source={icons.userlocation}
               style={{
                 width: 40,
                 height: 40,

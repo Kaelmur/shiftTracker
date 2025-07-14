@@ -5,10 +5,11 @@ export async function POST(request: Request) {
     const sql = neon(`${process.env.DATABASE_URL}`);
     const { name, email, clerkId, role } = await request.json();
 
+    // prettier-ignore
     if (!name || !email || !clerkId) {
       return Response.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

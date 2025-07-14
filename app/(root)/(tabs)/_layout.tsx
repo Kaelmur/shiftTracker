@@ -47,7 +47,7 @@ const Layout = () => {
           marginBottom: 20,
           height: 78,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           flexDirection: "row",
           position: "absolute",

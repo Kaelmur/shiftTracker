@@ -3,7 +3,7 @@ import InputField from "@/components/InputField";
 import { icons, images } from "@/constants";
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 
 const SignIn = () => {

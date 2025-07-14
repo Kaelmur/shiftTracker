@@ -117,6 +117,7 @@ function Start() {
           <Text className="text-white">Начать смену</Text>
         </TouchableOpacity>
       ) : (
+        // prettier-ignore
         <TouchableOpacity
           className="bg-red-500 px-6 py-3 rounded-lg"
           onPress={() => {
@@ -126,7 +127,7 @@ function Start() {
               [
                 { text: "Отменить", style: "cancel" },
                 { text: "Закончить", onPress: () => endShift(shiftId) },
-              ]
+              ],
             );
           }}
         >

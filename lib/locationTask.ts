@@ -6,6 +6,7 @@ import { TaskManagerTaskBody } from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_TASK";
 
+// prettier-ignore
 TaskManager.defineTask(
   LOCATION_TASK_NAME,
   async ({
