@@ -9,20 +9,22 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "usesAppleSignIn": false,
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationAlwaysUsageDescription": "We need your location to track your shifts even in background.",
         "NSLocationWhenInUseUsageDescription": "We need your location while the app is in use.",
-        "UIBackgroundModes": [
-          "location",
-          "location"
-        ]
+        "UIBackgroundModes": ["location"],
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.kaelmur.shiftTracker"
+      "bundleIdentifier": "com.kaelmur.shiftTracker",
+      "entitlements": {
+        "aps-environment": "development"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/fuel.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -41,6 +43,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-notifications",
       [
         "expo-router",
         {
@@ -57,11 +60,10 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#2F80ED",
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/splashtracker.png",
           "resizeMode": "contain"
         }
-      ],
-      "expo-notifications"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

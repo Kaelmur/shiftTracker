@@ -1,39 +1,105 @@
-import { Text, TouchableOpacity, View, Alert } from "react-native";
-import React, { useEffect, useState } from "react";
-import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
-import { useUser } from "@clerk/clerk-expo";
 import { SignOutButton } from "@/components/SignOutButton";
-import { LOCATION_TASK_NAME } from "@/lib/locationTask";
+import { useAuth } from "@/contexts/auth-context";
 import { fetchAPI } from "@/lib/fetch";
+import { LOCATION_TASK_NAME } from "@/lib/locationTask";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
+import React, { useEffect, useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 function Start() {
-  const { user } = useUser();
+  const { name } = useAuth();
   const [shiftId, setShiftId] = useState<number | null>(null);
 
   useEffect(() => {
-    const checkActiveShift = async () => {
-      if (!user) return;
+    // async function registerForPushNotificationsAsync() {
+    //   let expoPushToken;
 
+    //   if (!Device.isDevice) {
+    //     Alert.alert("❌ Must use a physical device for Push Notifications");
+    //     return;
+    //   }
+
+    //   // Request notification permissions
+    //   const { status: existingStatus } =
+    //     await Notifications.getPermissionsAsync();
+    //   let finalStatus = existingStatus;
+
+    //   if (existingStatus !== "granted") {
+    //     const { status } = await Notifications.requestPermissionsAsync();
+    //     finalStatus = status;
+    //   }
+
+    //   if (finalStatus !== "granted") {
+    //     Alert.alert("⚠️ Failed to get push token for notifications");
+    //     return;
+    //   }
+
+    //   try {
+    //     const tokenData = await Notifications.getExpoPushTokenAsync({
+    //       projectId: "23798b3a-6caf-4132-9311-a0aa06551f56",
+    //     });
+    //     console.log("Expo Push Token:", tokenData.data);
+    //   } catch (err) {
+    //     console.error("Error getting Expo push token:", err);
+    //   }
+    //   // Get Expo push token
+    //   const tokenData = await Notifications.getExpoPushTokenAsync({
+    //     projectId: "23798b3a-6caf-4132-9311-a0aa06551f56",
+    //   });
+    //   expoPushToken = tokenData.data;
+    //   console.log("📲 Expo Push Token:", expoPushToken);
+
+    //   // Get JWT from storage
+    //   const jwt = await SecureStore.getItemAsync("jwt_token");
+    //   if (!jwt) {
+    //     console.warn(
+    //       "⚠️ No JWT token found, cannot send push token to backend"
+    //     );
+    //     return expoPushToken;
+    //   }
+
+    //   // Send push token to backend
+    //   await fetchAPI("https://shiftapp.onrender.com/api/users/expo-token", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${jwt}`,
+    //     },
+    //     body: JSON.stringify({ expoPushToken }),
+    //   });
+
+    //   // Android-specific notification channel
+    //   if (Platform.OS === "android") {
+    //     Notifications.setNotificationChannelAsync("default", {
+    //       name: "default",
+    //       importance: Notifications.AndroidImportance.MAX,
+    //       vibrationPattern: [0, 250, 250, 250],
+    //       lightColor: "#FF231F7C",
+    //     });
+    //   }
+
+    //   return expoPushToken;
+    // }
+    const checkActiveShift = async () => {
       try {
         const storedId = await AsyncStorage.getItem("activeShiftId");
-        if (storedId) {
-          setShiftId(Number(storedId));
-        }
+        setShiftId(storedId ? Number(storedId) : null);
       } catch (err) {
         console.error("❌ Error reading SecureStore:", err);
       }
     };
 
+    // registerForPushNotificationsAsync();
     checkActiveShift();
-  }, [user]);
+  }, []);
 
   const startShift = async () => {
     try {
@@ -49,10 +115,27 @@ function Start() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return Alert.alert("No permission");
 
-      const email = user?.primaryEmailAddress?.emailAddress;
-      if (!email) return Alert.alert("No email");
+      const token = await SecureStore.getItemAsync("jwt_token");
+      if (!token) return Alert.alert("❌ No JWT token found");
 
-      await SecureStore.setItemAsync("userEmail", email);
+      // Create shift
+      const response = await fetchAPI(
+        "https://shiftapp.onrender.com/api/shifts/start",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 400) {
+        Alert.alert("Внимание", response.message);
+      }
+
+      await AsyncStorage.setItem("activeShiftId", String(response.shift.id));
+      setShiftId(response.shift.id);
 
       // Start location tracking
       const isRunning =
@@ -60,8 +143,8 @@ function Start() {
       if (!isRunning) {
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.High,
-          timeInterval: 10 * 1000,
-          distanceInterval: 0,
+          timeInterval: 600000,
+          distanceInterval: 3,
           foregroundService: {
             notificationTitle: "Tracking location",
             notificationBody: "Your location is being used in background",
@@ -71,73 +154,87 @@ function Start() {
         });
       }
 
-      // Create shift
-      const data = await fetchAPI("/(api)/shift", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      await AsyncStorage.setItem("activeShiftId", String(data.id));
-      setShiftId(data.id);
-
       Alert.alert("Смена началась");
     } catch (err) {
       console.error("❌ Error starting shift:", err);
     }
   };
 
-  const endShift = async (id: number) => {
+  const stopTracking = async () => {
+    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+    await AsyncStorage.removeItem("activeShiftId");
+    Alert.alert("✅ Принудительно закончили трекинг");
+  };
+
+  const endShift = async () => {
     try {
-      await fetchAPI("/(api)/shiftend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shift_id: id }),
-      });
+      const token = await SecureStore.getItemAsync("jwt_token");
+      if (!token)
+        return Alert.alert("❌ No token found", "Please log in again");
+
+      const res = await fetchAPI(
+        "https://shiftapp.onrender.com/api/shifts/end",
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
       setShiftId(null);
       await AsyncStorage.removeItem("activeShiftId");
-      setShiftId(null);
-      Alert.alert("Смена закончена");
+      Alert.alert("✅ Смена завершена", `Сменa окончена: ${res.shift.endedAt}`);
     } catch (err) {
       console.error("Error ending shift:", err);
     }
   };
 
   return (
-    <View className="flex-1 items-center justify-center space-y-6">
-      <Text className="text-lg font-bold">Привет Работник</Text>
-
+    <View className="flex-1 p-6">
+      <View className="flex-row justify-between items-center mb-6 mt-20">
+        <Text className="text-2xl font-semibold flex-1 flex-shrink">
+          Привет{name ? `, ${name}` : " Работник"} 👋
+        </Text>
+        <TouchableOpacity className="ml-2 p-2">
+          <SignOutButton />
+        </TouchableOpacity>
+      </View>
       {/* Only show if shift is not active */}
-      {!shiftId ? (
-        <TouchableOpacity
-          className="bg-green-500 px-6 py-3 rounded-lg"
-          onPress={startShift}
-        >
-          <Text className="text-white">Начать смену</Text>
-        </TouchableOpacity>
-      ) : (
-        // prettier-ignore
-        <TouchableOpacity
-          className="bg-red-500 px-6 py-3 rounded-lg"
-          onPress={() => {
-            Alert.alert(
-              "Закончить смену?",
-              "Вы уверены что хотите закончить смену сейчас?",
-              [
-                { text: "Отменить", style: "cancel" },
-                { text: "Закончить", onPress: () => endShift(shiftId) },
-              ],
-            );
-          }}
-        >
-          <Text className="text-white">Закончить смену</Text>
-        </TouchableOpacity>
-      )}
-
-      <TouchableOpacity className="px-6 py-3 rounded-lg">
-        <SignOutButton />
-      </TouchableOpacity>
+      <View className="flex-1 justify-center items-center">
+        {!shiftId ? (
+          <TouchableOpacity
+            className="bg-green-500 px-6 py-4 rounded-lg"
+            onPress={startShift}
+          >
+            <Text className="text-white">Начать смену</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            className="bg-red-500 px-6 py-3 rounded-lg"
+            onPress={() => {
+              Alert.alert(
+                "Закончить смену?",
+                "Вы уверены что хотите закончить смену сейчас?",
+                [
+                  { text: "Отменить", style: "cancel" },
+                  { text: "Закончить", onPress: () => endShift() },
+                ]
+              );
+            }}
+          >
+            <Text className="text-white">Закончить смену</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      {/* <TouchableOpacity
+        className="bg-green-500 px-6 py-3 rounded-lg"
+        onPress={stopTracking}
+      >
+        <Text className="text-white">Остановить</Text>
+      </TouchableOpacity> */}
     </View>
   );
 }

@@ -1,35 +1,35 @@
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
 import { icons, images } from "@/constants";
-import { useSignIn } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 
 const SignIn = () => {
   const [form, setForm] = useState({ email: "", password: "" });
 
-  const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
 
   const onSignInPress = async () => {
-    if (!isLoaded) return;
+    if (!form.email || !form.password) {
+      Alert.alert("Ошибка", "Заполните все поля");
+      return;
+    }
 
-    // Start the sign-in process using the email and password provided
     try {
-      const signInAttempt = await signIn.create({
-        identifier: form.email,
-        password: form.password,
-      });
+      const response = await axios.post(
+        "https://shiftapp.onrender.com/api/auth/login",
+        // eslint-disable-next-line prettier/prettier
+        form
+      );
+      const token = response.data.token;
+      await SecureStore.setItemAsync("jwt_token", token);
 
-      if (signInAttempt.status === "complete") {
-        await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/");
-      } else {
-        console.error(JSON.stringify(signInAttempt, null, 2));
-      }
+      router.replace("/(root)/(worker)/start");
     } catch (err: any) {
-      Alert.alert("Error", err.errors[0].longMessage);
+      Alert.alert("Ошибка", err.response?.data?.message || "Ошибка входа");
     }
   };
 
@@ -65,14 +65,6 @@ const SignIn = () => {
             onPress={onSignInPress}
             className="mt-6"
           />
-
-          <Link
-            href="/sign-up"
-            className="text-lg text-center text-general-200 mt-10"
-          >
-            <Text>Нет аккаунта? </Text>
-            <Text className="text-primary-500">Зарегистрироваться</Text>
-          </Link>
         </View>
       </View>
     </ScrollView>

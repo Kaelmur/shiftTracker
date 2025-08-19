@@ -23,24 +23,14 @@ import selectedMarker from "@/assets/icons/selected-marker.png";
 import star from "@/assets/icons/star.png";
 import target from "@/assets/icons/target.png";
 import to from "@/assets/icons/to.png";
+import userlocation from "@/assets/icons/userlocation.png";
 import check from "@/assets/images/check.png";
-import getStarted from "@/assets/images/get-started.png";
+import greentruck from "@/assets/images/greentruck.png";
 import message from "@/assets/images/message.png";
 import noResult from "@/assets/images/no-result.png";
-import onboarding1 from "@/assets/images/onboarding1.png";
-import onboarding2 from "@/assets/images/onboarding2.png";
-import onboarding3 from "@/assets/images/onboarding3.png";
-import signUpCar from "@/assets/images/signup-car.png";
-import greentruck from "@/assets/images/greentruck.png";
-import userlocation from "@/assets/icons/userlocation.png";
 
 export const images = {
-  onboarding1,
-  onboarding2,
-  onboarding3,
-  getStarted,
   greentruck,
-  signUpCar,
   check,
   noResult,
   message,

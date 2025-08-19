@@ -11,8 +11,6 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@clerk/backend": "^2.3.1",
-    "@clerk/clerk-expo": "^2.14.0",
     "@expo/config-plugins": "~10.1.1",
     "@expo/vector-icons": "^14.1.0",
     "@neondatabase/serverless": "^1.0.1",
@@ -21,11 +19,13 @@
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/stack": "^7.4.2",
+    "axios": "^1.11.0",
     "dayjs": "^1.11.13",
     "expo": "53.0.19",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
     "expo-dev-client": "~5.2.4",
+    "expo-device": "~7.1.4",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.3.2",
@@ -40,6 +40,7 @@
     "expo-system-ui": "~5.0.10",
     "expo-task-manager": "~13.1.6",
     "expo-web-browser": "~14.2.0",
+    "jwt-decode": "^4.0.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
+    "ajv": "^7.2.4",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "eslint-config-prettier": "^10.1.5",
