@@ -5,6 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/fuel.png",
+    "splash": {
+      "image": "./assets/images/splashtracker.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2F80ED"
+    },
     "scheme": "shifttracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -35,7 +40,8 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.kaelmur.shiftTracker"
+      "package": "com.kaelmur.shiftTracker",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
