@@ -118,9 +118,6 @@ function Start() {
         await Location.requestBackgroundPermissionsAsync();
       if (bgStatus !== "granted") return Alert.alert("Нет фона геолокации");
 
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return Alert.alert("No permission");
-
       const token = await SecureStore.getItemAsync("jwt_token");
       if (!token) return Alert.alert("❌ No JWT token found");
 
