@@ -1,4 +1,5 @@
 import { AuthContextType, DecodedToken } from "@/types/type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -46,6 +47,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (newToken: string) => {
     await SecureStore.setItemAsync("jwt_token", newToken);
+
+    await AsyncStorage.setItem("jwt_token", newToken);
     const decoded: DecodedToken = jwtDecode(newToken);
     setToken(newToken);
     setUserId(decoded.userId);

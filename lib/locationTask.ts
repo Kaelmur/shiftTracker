@@ -2,7 +2,6 @@
 import { fetchAPI } from "@/lib/fetch";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import * as SecureStore from "expo-secure-store";
 import * as TaskManager from "expo-task-manager";
 import { Alert } from "react-native";
 import { saveOfflineLocation } from "./db";
@@ -18,7 +17,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   const location = locations[0];
   if (!location) return;
 
-  const token = await SecureStore.getItemAsync("jwt_token");
+  const token = await AsyncStorage.getItem("jwt_token");
   const shiftId = await AsyncStorage.getItem("activeShiftId");
 
   if (!token || !shiftId) {

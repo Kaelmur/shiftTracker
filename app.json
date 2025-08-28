@@ -41,7 +41,12 @@
         "FOREGROUND_SERVICE_LOCATION"
       ],
       "package": "com.kaelmur.shiftTracker",
-      "versionCode": 2
+      "versionCode": 2,
+      "foregroundService": {
+        "type": "location",
+        "notificationTitle": "ShiftApp работает",
+        "notificationBody": "Мы отслеживаем твою локацию даже с выключенным экраном"
+      }
     },
     "web": {
       "bundler": "metro",
