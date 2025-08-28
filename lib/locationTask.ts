@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import * as TaskManager from "expo-task-manager";
 import { Alert } from "react-native";
+import { saveOfflineLocation } from "./db";
 
 export const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_TASK";
 
@@ -25,6 +26,9 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     return;
   }
 
+  const timestamp = location.timestamp;
+  const { latitude, longitude } = location.coords;
+
   try {
     // Check if backend still has this shift active
     const res = await fetchAPI(
@@ -41,13 +45,11 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       // shift ended on server → stop background task
       await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
       await AsyncStorage.removeItem("activeShiftId");
-      Alert.alert("Shift ended remotely. Stopping geofetching.");
+      Alert.alert("Смена завершена. Сбор геоданных остановлен.");
       return;
     }
 
     // If active → send current location
-    const timestamp = location.timestamp;
-    const { latitude, longitude } = location.coords;
     console.log("📍 Location captured:", { latitude, longitude, timestamp });
 
     await fetchAPI("https://shiftapp.onrender.com/api/shifts/shift-location", {
@@ -64,6 +66,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       }),
     });
   } catch (err) {
+    await saveOfflineLocation(shiftId, latitude, longitude, timestamp);
     console.error("Error in location task", err);
   }
 });

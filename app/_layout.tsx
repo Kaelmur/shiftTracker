@@ -1,8 +1,11 @@
+import { initDB } from "@/lib/db";
 import "@/lib/locationTask";
+import { setupSync } from "@/lib/syncManage";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { View } from "react-native";
 import "react-native-reanimated";
 import { AuthProvider } from "../contexts/auth-context";
 import "../global.css";
@@ -26,18 +29,25 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  useEffect(() => {
+    (async () => {
+      await initDB(); // open DB + create table
+      setupSync(); // start online sync listener
+    })();
+  }, []);
 
   return (
     <AuthProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(root)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      {loaded ? (
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(root)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      ) : (
+        <View />
+      )}
     </AuthProvider>
   );
 }

@@ -54,7 +54,9 @@
     "react-native-webview": "13.13.5",
     "react-navigation": "^4.4.4",
     "react-navigation-stack": "^2.10.4",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "expo-sqlite": "~15.2.14",
+    "@react-native-community/netinfo": "11.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

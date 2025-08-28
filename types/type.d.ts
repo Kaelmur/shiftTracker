@@ -64,4 +64,5 @@ declare interface AuthContextType {
   name: string | null;
   isLoading: boolean;
   logout: () => Promise<void>;
+  login: (token: string) => Promise<void>;
 }

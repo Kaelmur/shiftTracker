@@ -1,14 +1,16 @@
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
 import { icons, images } from "@/constants";
+import { useAuth } from "@/contexts/auth-context";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 
 const SignIn = () => {
   const [form, setForm] = useState({ email: "", password: "" });
+
+  const { login } = useAuth();
 
   const router = useRouter();
 
@@ -25,7 +27,7 @@ const SignIn = () => {
         form
       );
       const token = response.data.token;
-      await SecureStore.setItemAsync("jwt_token", token);
+      await login(token);
 
       router.replace("/(root)/(worker)/start");
     } catch (err: any) {

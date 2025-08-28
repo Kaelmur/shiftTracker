@@ -10,6 +10,7 @@ const AuthContext = createContext<AuthContextType>({
   name: null,
   isLoading: true,
   logout: async () => {},
+  login: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -43,6 +44,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadToken();
   }, []);
 
+  const login = async (newToken: string) => {
+    await SecureStore.setItemAsync("jwt_token", newToken);
+    const decoded: DecodedToken = jwtDecode(newToken);
+    setToken(newToken);
+    setUserId(decoded.userId);
+    setName(decoded.name ?? null);
+  };
+
   const logout = async () => {
     await SecureStore.deleteItemAsync("jwt_token");
     setToken(null);
@@ -59,7 +68,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ token, userId, name, isLoading, logout }}>
+    <AuthContext.Provider
+      value={{ token, userId, name, isLoading, logout, login }}
+    >
       {children}
     </AuthContext.Provider>
   );

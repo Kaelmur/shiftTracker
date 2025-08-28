@@ -8,8 +8,15 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
-import React, { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -17,31 +24,36 @@ dayjs.extend(timezone);
 function Start() {
   const { name } = useAuth();
   const [shiftId, setShiftId] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const checkActiveShift = async () => {
+    try {
+      const storedId = await AsyncStorage.getItem("activeShiftId");
+      setShiftId(storedId ? Number(storedId) : null);
+    } catch (err) {
+      console.error("❌ Error reading SecureStore:", err);
+    }
+  };
 
   useEffect(() => {
     // async function registerForPushNotificationsAsync() {
     //   let expoPushToken;
-
     //   if (!Device.isDevice) {
     //     Alert.alert("❌ Must use a physical device for Push Notifications");
     //     return;
     //   }
-
     //   // Request notification permissions
     //   const { status: existingStatus } =
     //     await Notifications.getPermissionsAsync();
     //   let finalStatus = existingStatus;
-
     //   if (existingStatus !== "granted") {
     //     const { status } = await Notifications.requestPermissionsAsync();
     //     finalStatus = status;
     //   }
-
     //   if (finalStatus !== "granted") {
     //     Alert.alert("⚠️ Failed to get push token for notifications");
     //     return;
     //   }
-
     //   try {
     //     const tokenData = await Notifications.getExpoPushTokenAsync({
     //       projectId: "23798b3a-6caf-4132-9311-a0aa06551f56",
@@ -56,7 +68,6 @@ function Start() {
     //   });
     //   expoPushToken = tokenData.data;
     //   console.log("📲 Expo Push Token:", expoPushToken);
-
     //   // Get JWT from storage
     //   const jwt = await SecureStore.getItemAsync("jwt_token");
     //   if (!jwt) {
@@ -65,7 +76,6 @@ function Start() {
     //     );
     //     return expoPushToken;
     //   }
-
     //   // Send push token to backend
     //   await fetchAPI("https://shiftapp.onrender.com/api/users/expo-token", {
     //     method: "POST",
@@ -75,7 +85,6 @@ function Start() {
     //     },
     //     body: JSON.stringify({ expoPushToken }),
     //   });
-
     //   // Android-specific notification channel
     //   if (Platform.OS === "android") {
     //     Notifications.setNotificationChannelAsync("default", {
@@ -85,20 +94,17 @@ function Start() {
     //       lightColor: "#FF231F7C",
     //     });
     //   }
-
     //   return expoPushToken;
     // }
-    const checkActiveShift = async () => {
-      try {
-        const storedId = await AsyncStorage.getItem("activeShiftId");
-        setShiftId(storedId ? Number(storedId) : null);
-      } catch (err) {
-        console.error("❌ Error reading SecureStore:", err);
-      }
-    };
-
     // registerForPushNotificationsAsync();
     checkActiveShift();
+  }, []);
+
+  // manual refresh of the page
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await checkActiveShift();
+    setRefreshing(false);
   }, []);
 
   const startShift = async () => {
@@ -193,49 +199,62 @@ function Start() {
   };
 
   return (
-    <View className="flex-1 p-6">
-      <View className="flex-row justify-between items-center mb-6 mt-20">
-        <Text className="text-2xl font-semibold flex-1 flex-shrink">
-          Привет{name ? `, ${name}` : " Работник"} 👋
-        </Text>
-        <TouchableOpacity className="ml-2 p-2">
-          <SignOutButton />
-        </TouchableOpacity>
-      </View>
-      {/* Only show if shift is not active */}
-      <View className="flex-1 justify-center items-center">
-        {!shiftId ? (
-          <TouchableOpacity
-            className="bg-green-500 px-6 py-4 rounded-lg"
-            onPress={startShift}
-          >
-            <Text className="text-white">Начать смену</Text>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
+      contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          titleColor="#010101"
+          title="Обновляем..."
+        />
+      }
+    >
+      <View className="flex-1 p-6">
+        <View className="flex-row justify-between items-center mb-6">
+          <Text className="text-2xl font-semibold flex-1 flex-shrink">
+            Привет{name ? `, ${name}` : " Работник"} 👋
+          </Text>
+          <TouchableOpacity className="ml-2 p-2">
+            <SignOutButton />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            className="bg-red-500 px-6 py-3 rounded-lg"
-            onPress={() => {
-              Alert.alert(
-                "Закончить смену?",
-                "Вы уверены что хотите закончить смену сейчас?",
-                [
-                  { text: "Отменить", style: "cancel" },
-                  { text: "Закончить", onPress: () => endShift() },
-                ]
-              );
-            }}
-          >
-            <Text className="text-white">Закончить смену</Text>
-          </TouchableOpacity>
-        )}
+        </View>
+        {/* Only show if shift is not active */}
+        <View className="flex-1 justify-center items-center">
+          {!shiftId ? (
+            <TouchableOpacity
+              className="bg-green-500 px-6 py-4 rounded-lg"
+              onPress={startShift}
+            >
+              <Text className="text-white">Начать смену</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              className="bg-red-500 px-6 py-3 rounded-lg"
+              onPress={() => {
+                Alert.alert(
+                  "Закончить смену?",
+                  "Вы уверены что хотите закончить смену сейчас?",
+                  [
+                    { text: "Отменить", style: "cancel" },
+                    { text: "Закончить", onPress: () => endShift() },
+                  ]
+                );
+              }}
+            >
+              <Text className="text-white">Закончить смену</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {/* <TouchableOpacity
+          className="bg-green-500 px-6 py-3 rounded-lg"
+          onPress={stopTracking}
+        >
+          <Text className="text-white">Остановить</Text>
+        </TouchableOpacity> */}
       </View>
-      {/* <TouchableOpacity
-        className="bg-green-500 px-6 py-3 rounded-lg"
-        onPress={stopTracking}
-      >
-        <Text className="text-white">Остановить</Text>
-      </TouchableOpacity> */}
-    </View>
+    </ScrollView>
   );
 }
 
