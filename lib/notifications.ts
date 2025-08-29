@@ -38,7 +38,7 @@ export async function registerForPushNotificationsAsync() {
   }
 
   // Send push token to backend
-  await fetchAPI("https://shiftapp.onrender.com/api/users/expo-token", {
+  await fetchAPI("https://shifts.kz/api/users/expo-token", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

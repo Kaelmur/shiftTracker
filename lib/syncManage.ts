@@ -20,22 +20,19 @@ export const flushOfflineLocations = async () => {
 
   for (const loc of locations) {
     try {
-      await fetchAPI(
-        "https://shiftapp.onrender.com/api/shifts/shift-location",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            shiftId: loc.shiftId,
-            lat: loc.latitude,
-            lng: loc.longitude,
-            timestamp: loc.timestamp,
-          }),
-        }
-      );
+      await fetchAPI("https://shifts.kz/api/shifts/shift-location", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          shiftId: loc.shiftId,
+          lat: loc.latitude,
+          lng: loc.longitude,
+          timestamp: loc.timestamp,
+        }),
+      });
 
       // ✅ delete after successful upload
       await deleteLocation(loc.id);

@@ -30,15 +30,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   try {
     // Check if backend still has this shift active
-    const res = await fetchAPI(
-      "https://shiftapp.onrender.com/api/shifts/active",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetchAPI("https://shifts.kz/api/shifts/active", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!res) {
       // shift ended on server → stop background task
@@ -51,7 +48,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     // If active → send current location
     console.log("📍 Location captured:", { latitude, longitude, timestamp });
 
-    await fetchAPI("https://shiftapp.onrender.com/api/shifts/shift-location", {
+    await fetchAPI("https://shifts.kz/api/shifts/shift-location", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

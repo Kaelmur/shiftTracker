@@ -22,7 +22,7 @@ const SignIn = () => {
 
     try {
       const response = await axios.post(
-        "https://shiftapp.onrender.com/api/auth/login",
+        "https://shifts.kz/api/auth/login",
         // eslint-disable-next-line prettier/prettier
         form
       );

@@ -122,16 +122,13 @@ function Start() {
       if (!token) return Alert.alert("❌ No JWT token found");
 
       // Create shift
-      const response = await fetchAPI(
-        "https://shiftapp.onrender.com/api/shifts/start",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetchAPI("https://shifts.kz/api/shifts/start", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.status === 400) {
         Alert.alert("Внимание", response.message);
@@ -175,16 +172,13 @@ function Start() {
       if (!token)
         return Alert.alert("❌ No token found", "Please log in again");
 
-      const res = await fetchAPI(
-        "https://shiftapp.onrender.com/api/shifts/end",
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await fetchAPI("https://shifts.kz/api/shifts/end", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
       setShiftId(null);
