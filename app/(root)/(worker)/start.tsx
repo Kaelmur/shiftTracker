@@ -183,7 +183,10 @@ function Start() {
       await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
       setShiftId(null);
       await AsyncStorage.removeItem("activeShiftId");
-      Alert.alert("✅ Смена завершена", `Сменa окончена: ${res.shift.endedAt}`);
+      Alert.alert(
+        "✅ Смена завершена",
+        `Сменa окончена: ${res.shift.endedAt.toLocaleString()}`
+      );
     } catch (err) {
       console.error("Error ending shift:", err);
     }
